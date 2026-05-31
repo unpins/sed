@@ -15,6 +15,22 @@
       pkgsAttr = "gnused";
       smoke = [ "--version" ];
       smokePattern = "GNU sed";
+
+      # pkgsStatic (glibc→musl) and the cross arches can't run the just-built
+      # binary, so sed's Makefile skips help2man and installs GNU's "OOPS, we
+      # were unable to create a proper manual page" placeholder sed.1. Swap in
+      # the real page from the build host (help2man ran there). Notes:
+      #   - `buildPackages.gnused` is splicing-aware → the native host build;
+      #     `pkgs.gnused` would be the cross stub on i686/ppc64le/riscv64. The
+      #     page is arch-independent roff, so the host's is correct everywhere.
+      #   - Overwrite uncompressed: at postInstall the page is still plain
+      #     `sed.1`; nixpkgs' compressManPages gzips it later in fixupPhase.
+      build = pkgs: pkgs.pkgsStatic.gnused.overrideAttrs (old: {
+        postInstall = (old.postInstall or "") + ''
+          zcat ${pkgs.buildPackages.gnused}/share/man/man1/sed.1.gz > $out/share/man/man1/sed.1
+        '';
+      });
+
       # sed's bundled gnulib has `getrandom.c` that calls `BCryptGenRandom`
       # on _WIN32 but configure's gl_LIBS_LIB_RANDOM probe doesn't pick up
       # `-lbcrypt` under cross. Add it explicitly to LIBS; everything else
