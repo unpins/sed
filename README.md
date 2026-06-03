@@ -9,18 +9,18 @@ Standalone build of [GNU sed](https://www.gnu.org/software/sed/), the stream edi
 
 Part of the [unpins](https://unpins.org) project — native single-binary builds with no third-party runtime dependencies.
 
-## Installation
+## Usage
 
-Install with [unpin](https://github.com/unpins/unpin):
+Run the `sed` program with [unpin](https://github.com/unpins/unpin):
 
 ```bash
-unpin sed
+unpin sed 's/foo/bar/g' file.txt
 ```
 
-Or run without installing:
+To install it onto your PATH:
 
 ```bash
-unpin run sed
+unpin install sed
 ```
 
 ## Build locally
