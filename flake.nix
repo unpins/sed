@@ -16,6 +16,12 @@
       smoke = [ "--version" ];
       smokePattern = "GNU sed";
 
+      engine = "unpin-llvm";
+      multicall = {
+        inferLinkInputs = true;
+        programs = [{ name = "sed"; }];
+      };
+
       # pkgsStatic (glibc→musl) and the cross arches can't run the just-built
       # binary, so sed's Makefile skips help2man and installs GNU's "OOPS, we
       # were unable to create a proper manual page" placeholder sed.1. Swap in
