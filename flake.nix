@@ -19,6 +19,11 @@
       engine = "unpin-llvm";
       multicall = {
         inferLinkInputs = true;
+        # Also fold into the Windows (mingw PE32+) mega — validated end-to-end
+        # (the grep+sed mega runs sed on a real Windows host). See grep's note.
+        windows = true;
+        # And into the darwin (Mach-O) mega via the engine, same as grep/bc.
+        darwin = true;
         programs = [{ name = "sed"; }];
       };
 
