@@ -20,7 +20,6 @@
       multicall = {
         inferLinkInputs = true;
         windows = true;
-        darwin = true;
         programs = [{ name = "sed"; }];
       };
 
