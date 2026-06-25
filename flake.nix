@@ -19,33 +19,24 @@
       engine = "unpin-llvm";
       multicall = {
         inferLinkInputs = true;
-        # Also fold into the Windows (mingw PE32+) mega — validated end-to-end
-        # (the grep+sed mega runs sed on a real Windows host). See grep's note.
         windows = true;
-        # And into the darwin (Mach-O) mega via the engine, same as grep/bc.
         darwin = true;
         programs = [{ name = "sed"; }];
       };
 
-      # pkgsStatic (glibc→musl) and the cross arches can't run the just-built
-      # binary, so sed's Makefile skips help2man and installs GNU's "OOPS, we
-      # were unable to create a proper manual page" placeholder sed.1. Swap in
-      # the real page from the build host (help2man ran there). Notes:
-      #   - `buildPackages.gnused` is splicing-aware → the native host build;
-      #     `pkgs.gnused` would be the cross stub on i686/ppc64le/riscv64. The
-      #     page is arch-independent roff, so the host's is correct everywhere.
-      #   - Overwrite uncompressed: at postInstall the page is still plain
-      #     `sed.1`; nixpkgs' compressManPages gzips it later in fixupPhase.
+      # Cross/musl can't run the just-built sed, so its Makefile skips help2man
+      # and installs GNU's "OOPS" placeholder page. Swap in the host's real one
+      # (buildPackages = splicing-aware native build, not the cross stub; the
+      # roff is arch-independent). Still uncompressed here — compressManPages
+      # gzips it later in fixupPhase.
       build = pkgs: pkgs.pkgsStatic.gnused.overrideAttrs (old: {
         postInstall = (old.postInstall or "") + ''
           zcat ${pkgs.buildPackages.gnused}/share/man/man1/sed.1.gz > $out/share/man/man1/sed.1
         '';
       });
 
-      # sed's bundled gnulib has `getrandom.c` that calls `BCryptGenRandom`
-      # on _WIN32 but configure's gl_LIBS_LIB_RANDOM probe doesn't pick up
-      # `-lbcrypt` under cross. Add it explicitly to LIBS; everything else
-      # cross-builds clean.
+      # gnulib getrandom needs BCryptGenRandom but the cross configure probe
+      # misses -lbcrypt; add it explicitly.
       windowsBuild = pkgs:
         let cross = unpins-lib.lib.mingwStaticCross pkgs; in
         cross.gnused.overrideAttrs (old: {
