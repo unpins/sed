@@ -18,7 +18,6 @@
 
       engine = "unpin-llvm";
       multicall = {
-        inferLinkInputs = true;
         windows = true;
         programs = [{ name = "sed"; }];
       };
