@@ -28,6 +28,11 @@
       # roff is arch-independent). Still uncompressed here — compressManPages
       # gzips it later in fixupPhase.
       build = pkgs: pkgs.pkgsStatic.gnused.overrideAttrs (old: {
+        # Run GNU sed's test suite on native runners (0 failures under
+        # static-musl); auto-skips on crosses the build host can't execute.
+        doCheck = pkgs.pkgsStatic.gnused.stdenv.buildPlatform.canExecute
+          pkgs.pkgsStatic.gnused.stdenv.hostPlatform;
+        nativeCheckInputs = (old.nativeCheckInputs or [ ]) ++ [ pkgs.buildPackages.perl ];
         postInstall = (old.postInstall or "") + ''
           zcat ${pkgs.buildPackages.gnused}/share/man/man1/sed.1.gz > $out/share/man/man1/sed.1
         '';
