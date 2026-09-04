@@ -49,5 +49,5 @@ The [Releases](https://github.com/unpins/sed/releases) page has standalone binar
 ## Build notes
 
 - **Man page:** the static (musl) and cross builds skip help2man, so upstream installs a placeholder `sed.1`. We swap in the real help2man page from the native build host (arch-independent roff), keeping the embedded man identical on every target.
-- **Windows:** a single static `sed.exe` cross-compiled with mingw-w64 (linking `-lbcrypt` for gnulib's `getrandom`).
+- **Windows:** a single `sed.exe` targeting the mingw-w64 runtime, linking `-lbcrypt` for gnulib's `getrandom`.
 - **Tests:** GNU sed's test suite runs on native builds (0 failures under static-musl) and auto-skips on cross targets the build host can't execute.
