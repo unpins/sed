@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [4.10-1] - 2026-09-26
+
 ### Changed
 
 - Updated to GNU sed 4.10.
