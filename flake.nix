@@ -42,12 +42,12 @@
         '';
       });
 
-      # gnulib getrandom needs BCryptGenRandom but the cross configure probe
-      # misses -lbcrypt; add it explicitly.
       windowsBuild = pkgs:
         let cross = unpins-lib.lib.mingwStaticCross pkgs; in
         cross.gnused.overrideAttrs (old: {
-          NIX_LDFLAGS = (old.NIX_LDFLAGS or "") + " -lbcrypt";
+          postInstall = (old.postInstall or "") + ''
+            zcat ${pkgs.buildPackages.gnused}/share/man/man1/sed.1.gz > $out/share/man/man1/sed.1
+          '';
         });
     };
 }
