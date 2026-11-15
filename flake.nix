@@ -22,19 +22,18 @@
         programs = [{ name = "sed"; }];
       };
 
-      # Cross/musl can't run the just-built sed, so its Makefile skips help2man
-      # and installs GNU's "OOPS" placeholder page. Swap in the host's real one
-      # (buildPackages = splicing-aware native build, not the cross stub; the
-      # roff is arch-independent). Still uncompressed here — compressManPages
-      # gzips it later in fixupPhase.
+      # nixpkgs sets PERL=missing whenever host != build (always, for musl and
+      # mingw), so the Makefile skips help2man and installs GNU's "OOPS"
+      # placeholder page. Swap in the build host's real one (buildPackages =
+      # the native build; the roff is arch-independent), in both recipes.
+      # Still uncompressed here — compressManPages gzips it in fixupPhase.
       build = pkgs: let
         sp = pkgs.pkgsStatic.gnused.stdenv;
         native = sp.buildPlatform.canExecute sp.hostPlatform;
       in pkgs.pkgsStatic.gnused.overrideAttrs (old: {
-        # Run GNU sed's test suite on native runners (0 failures under
-        # static-musl); auto-skips on crosses the build host can't execute.
-        # nixpkgs sets PERL=missing whenever host != build, which musl-on-glibc
-        # always is; that also skips the Perl tests, so drop it where we run them.
+        # GNU sed's whole suite, the Perl tests included, on native runners
+        # (0 failures under static-musl); PERL=missing would skip those, so
+        # it goes where the suite runs.
         doCheck = native;
         env = if native then removeAttrs (old.env or { }) [ "PERL" ] else old.env or { };
         postInstall = (old.postInstall or "") + ''

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- On Windows, `unpin man sed` showed GNU's "OOPS" placeholder page instead of
+  the manual; it now shows the same page as on Linux and macOS.
+
+### Changed
+
+- The Perl tests of sed's suite (`misc.pl`, `debug.pl`) now run on native
+  builds too; they were silently skipped.
+
 ## [4.10-1] - 2026-09-26
 
 ### Changed
