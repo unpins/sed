@@ -27,12 +27,16 @@
       # (buildPackages = splicing-aware native build, not the cross stub; the
       # roff is arch-independent). Still uncompressed here — compressManPages
       # gzips it later in fixupPhase.
-      build = pkgs: pkgs.pkgsStatic.gnused.overrideAttrs (old: {
+      build = pkgs: let
+        sp = pkgs.pkgsStatic.gnused.stdenv;
+        native = sp.buildPlatform.canExecute sp.hostPlatform;
+      in pkgs.pkgsStatic.gnused.overrideAttrs (old: {
         # Run GNU sed's test suite on native runners (0 failures under
         # static-musl); auto-skips on crosses the build host can't execute.
-        doCheck = pkgs.pkgsStatic.gnused.stdenv.buildPlatform.canExecute
-          pkgs.pkgsStatic.gnused.stdenv.hostPlatform;
-        nativeCheckInputs = (old.nativeCheckInputs or [ ]) ++ [ pkgs.buildPackages.perl ];
+        # nixpkgs sets PERL=missing whenever host != build, which musl-on-glibc
+        # always is; that also skips the Perl tests, so drop it where we run them.
+        doCheck = native;
+        env = if native then removeAttrs (old.env or { }) [ "PERL" ] else old.env or { };
         postInstall = (old.postInstall or "") + ''
           zcat ${pkgs.buildPackages.gnused}/share/man/man1/sed.1.gz > $out/share/man/man1/sed.1
         '';
